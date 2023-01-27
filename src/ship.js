@@ -1,4 +1,4 @@
-const Ship = (length) => {
+const Ship = (type, length) => {
     let hitCount = 0;
 
     const hit = () => {
@@ -10,6 +10,12 @@ const Ship = (length) => {
     }
 
     return {
+         get type() {
+            return type;
+         },
+        get length() {
+            return length;
+        },
         hit,
         isSunk
     }

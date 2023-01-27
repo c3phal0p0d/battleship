@@ -11,6 +11,10 @@ const Gameboard = () => {
         }
     }
 
+    const getSquare = (row, column) => {
+        return board[row][column];
+    }
+
     const placeShip = (ship, coordinatesArray) => {
         for (let i=0; i<coordinatesArray.length; i++){
             coordinates = coordinatesArray[i];
@@ -43,6 +47,7 @@ const Gameboard = () => {
         get board() {
             return board;
         },
+        getSquare,
         placeShip,
         receiveAttack,
         allShipsSunk

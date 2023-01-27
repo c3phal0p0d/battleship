@@ -3,7 +3,7 @@ const Ship = require('../ship');
 
 test("test placeShip()", () => {
     const gameboard = Gameboard();
-    const ship = Ship(1);
+    const ship = Ship("Ship", 1);
     gameboard.placeShip(ship, [[0, 0]]);
     
     expect(gameboard.board[0][0]).toEqual(ship);
@@ -21,7 +21,7 @@ test("test receiveAttack() on square containing ship", () => {
 
 test("test receiveAttack() on empty square", () => {
     const gameboard = Gameboard();
-    const ship = Ship(1);
+    const ship = Ship("Ship", 1);
     gameboard.placeShip(ship, [[0, 0]]);
 
     gameboard.receiveAttack([0, 1]);
@@ -31,7 +31,7 @@ test("test receiveAttack() on empty square", () => {
 
 test("test allShipsSunk()", () => {
     const gameboard = Gameboard();
-    const ship = Ship(1);
+    const ship = Ship("Ship", 1);
     gameboard.placeShip(ship, [[0, 0]]);
 
     gameboard.receiveAttack([0, 0]);
