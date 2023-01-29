@@ -9,8 +9,22 @@ const Game = () => {
     const player = Player();
     const enemy = Player();
 
-
     /*** INITIALIZE SHIP POSITIONS ***/
+    const generateRandomShipPositions = (board) => {
+        let row = Math.floor(Math.random() * 10);
+        let column = Math.floor(Math.random() * 10);
+        let isHorizontal = (Math.floor(Math.random() * 2)==1 ? true : false);
+
+        for (let i=0; i<ships.length; i++){
+            while (!isValidShipPosition(row, column, ships[i], isHorizontal, board)){
+                row = Math.floor(Math.random() * 10);
+                column = Math.floor(Math.random() * 10);
+                isHorizontal = (Math.floor(Math.random() * 2)==1 ? true : false);
+            }
+            addShipToBoard(row, column, ships[i], isHorizontal, board);
+        }
+    }
+
     const addShipToBoard = (row, column, ship, isHorizontal, board) => {
         let coordinatesArray = [];
         for (let i=0; i<ship.length; i++){
@@ -49,6 +63,15 @@ const Game = () => {
         return true;
     }
 
+    /*** GAMEPLAY ***/
+    const getMoveInput = () => {
+
+    }
+
+    const checkHit = () => {
+
+    }
+
     return {
         get player() {
             return player;
@@ -56,6 +79,7 @@ const Game = () => {
         get enemy() {
             return enemy;
         },
+        generateRandomShipPositions,
         addShipToBoard,
         isValidShipPosition
     }

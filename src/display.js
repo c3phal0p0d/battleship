@@ -1,11 +1,11 @@
 const Ship = require("./ship");
 const Game = require("./game");
 const ships = [Ship("Carrier", 5), Ship("Battleship", 4), Ship("Destroyer", 3), Ship("Submarine", 3), Ship("Patrol Boat", 2)];
+const game = Game();
 
 let isHorizontal = true;
 let shipTypeIndex = 0;
 let readyToPlay = false;
-const game = Game();
 
 export function renderPlaceShipsScreen() {
     const content = document.querySelector("#content");
@@ -196,6 +196,7 @@ export function renderGameScreen() {
     const enemyBoardDiv = document.createElement("div");
     enemyBoardDiv.classList.add("board");
     enemyBoardDiv.classList.add("enemy");
+    game.generateRandomShipPositions(game.enemy.gameboard);
     renderGameboard(game.enemy.gameboard, enemyBoardDiv);
     enemyContainer.appendChild(enemyBoardDiv);
 
