@@ -8,8 +8,8 @@ const Player = () => {
         enemyGameboard.receiveAttack(coordinates);
     }
 
-    const automatedAttack = (enemyGameboard) => {
-        console.log("ee");
+    async function automatedAttack(enemyGameboard) {
+        
         let coordinates = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
         let square = enemyGameboard.getSquare(coordinates[0], coordinates[1]);
 
@@ -20,7 +20,6 @@ const Player = () => {
 
         setTimeout(function () {
             enemyGameboard.receiveAttack(coordinates);
-            Display.displayCurrentPlayerTurn();
         }, 2000);
     }
 
