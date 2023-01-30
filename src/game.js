@@ -9,6 +9,8 @@ const Game = () => {
     const player = Player();
     const enemy = Player();
 
+    let currentPlayerTurn = "player";
+
     /*** INITIALIZE SHIP POSITIONS ***/
     const generateRandomShipPositions = (board) => {
         let row = Math.floor(Math.random() * 10);
@@ -23,20 +25,6 @@ const Game = () => {
             }
             addShipToBoard(row, column, ships[i], isHorizontal, board);
         }
-    }
-
-    const addShipToBoard = (row, column, ship, isHorizontal, board) => {
-        let coordinatesArray = [];
-        for (let i=0; i<ship.length; i++){
-            if (isHorizontal){
-                coordinatesArray.push([row, column + i]);
-            } else {
-                coordinatesArray.push([row + i, column]);
-            }
-        }
-
-        board.placeShip(ship, coordinatesArray);
-
     }
 
     const isValidShipPosition = (row, column, ship, isHorizontal, board) => {
@@ -63,13 +51,48 @@ const Game = () => {
         return true;
     }
 
-    /*** GAMEPLAY ***/
-    const getMoveInput = () => {
+    const addShipToBoard = (row, column, ship, isHorizontal, board) => {
+        let coordinatesArray = [];
+        for (let i=0; i<ship.length; i++){
+            if (isHorizontal){
+                coordinatesArray.push([row, column + i]);
+            } else {
+                coordinatesArray.push([row + i, column]);
+            }
+        }
+
+        board.placeShip(ship, coordinatesArray);
 
     }
 
-    const checkHit = () => {
+    /*** GAMEPLAY ***/
+    const isValidMove = (row, column, board) => {
+        // check if computer is currently making its move
+        console.log(currentPlayerTurn);
+        if (currentPlayerTurn=="computer"){
+            return false;
+        }
 
+        // check if square has already been hit
+        if (board.getSquare(row, column)=="m" | board.getSquare(row, column)=="s"){
+            return false;
+        }
+
+        return true;
+    }
+
+    const makeMove = (coordinates=null) => {
+        console.log(currentPlayerTurn);
+        if (currentPlayerTurn=="player"){
+            player.attack(enemy.gameboard, coordinates);
+            currentPlayerTurn = "computer";
+            Display.displayCurrentPlayerTurn();
+            makeMove();
+        } else {
+            console.log("e");
+            enemy.automatedAttack(player.gameboard);
+            currentPlayerTurn = "player";
+        }
     }
 
     return {
@@ -79,9 +102,15 @@ const Game = () => {
         get enemy() {
             return enemy;
         },
+        get currentPlayerTurn() {
+            return currentPlayerTurn;
+        },
+        set currentPlayerTurn(currentPlayerTurn) {},
         generateRandomShipPositions,
+        isValidShipPosition,
         addShipToBoard,
-        isValidShipPosition
+        isValidMove,
+        makeMove
     }
 }
 

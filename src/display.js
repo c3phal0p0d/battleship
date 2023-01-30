@@ -177,6 +177,7 @@ export function renderGameScreen() {
 
     const playerHeader = document.createElement("h3");
     playerHeader.textContent = "You";
+    playerHeader.classList.add("current-player-turn");
     playerContainer.appendChild(playerHeader);
 
     const playerBoardDiv = document.createElement("div");
@@ -200,6 +201,11 @@ export function renderGameScreen() {
     renderGameboard(game.enemy.gameboard, enemyBoardDiv);
     enemyContainer.appendChild(enemyBoardDiv);
 
+    const currentPlayerTurnDiv = document.createElement("div");
+    currentPlayerTurnDiv.id = "current-player-turn";
+    currentPlayerTurnDiv.textContent = "Make your move";
+    content.appendChild(currentPlayerTurnDiv);
+
 }
 
 export function renderGameboard(gameboard, boardDiv){
@@ -209,11 +215,80 @@ export function renderGameboard(gameboard, boardDiv){
             square = document.createElement("div");
             square.setAttribute("data-row", i);
             square.setAttribute("data-column", j);
-            if (gameboard.getSquare(i, j) && typeof(gameboard.getSquare(i, j))=="object"){
+            if (gameboard==game.player.gameboard && gameboard.getSquare(i, j) && typeof(gameboard.getSquare(i, j))=="object"){
                 square.style.backgroundColor = "#e5dace";
                 square.style.border = "0.5px solid #1e1c32";
             }
+            square.addEventListener("mouseover", (event) => {
+                if (gameboard==game.enemy.gameboard) renderMoveToMake(event.currentTarget);
+            });
+            square.addEventListener("mouseout", (event) => {
+                if (gameboard==game.enemy.gameboard) clearMoveToMake(event.currentTarget);
+            });
+            square.addEventListener("click", (event) => {
+                if (gameboard==game.enemy.gameboard) renderMove(event.currentTarget);
+            });
             boardDiv.appendChild(square);
         }
     }
+}
+
+function renderMoveToMake(square){
+    let row = parseInt(square.getAttribute("data-row"));
+    let column = parseInt(square.getAttribute("data-column"));
+
+    if (!game.isValidMove(row, column, game.enemy.gameboard)) {
+        return;
+    }
+
+    square.style.backgroundColor = "#e5dace59";
+}
+
+
+function clearMoveToMake(square){
+    let row = parseInt(square.getAttribute("data-row"));
+    let column = parseInt(square.getAttribute("data-column"));
+
+    if (!game.isValidMove(row, column, game.enemy.gameboard)) {
+        return;
+    }
+
+    square.style.backgroundColor = "#1e1c32";
+}
+
+function renderMove(square){
+    let row = parseInt(square.getAttribute("data-row"));
+    let column = parseInt(square.getAttribute("data-column"));
+
+    if (!game.isValidMove(row, column, game.enemy.gameboard)) {
+        return;
+    }
+
+    /*
+    // if hit ship
+    square.style.color =  "#1e1c32";
+    square.backgroundColor = "#e5dace";
+
+    // if sunk ship
+    square.style.color =  "#1e1c32";
+    square.backgroundColor = "#e5dace59";
+    */
+
+    // if miss
+    square.style.color = "#e5dace";
+    square.style.backgroundColor = "#1e1c32";
+    square.textContent = "X";
+    
+    game.makeMove([row, column]);
+    game.enemy.automatedAttack(game.player.gameboard);
+}
+
+export function renderComputerMove(row, column){
+    square.style.backgroundColor = "#1e1c32";
+    square.textContent = "X";
+}
+
+export function displayCurrentPlayerTurn(){
+    const currentPlayerTurnText = document.querySelector("#current-player-turn");
+    currentPlayerTurnText.textContent = (game.currentPlayerTurn=="player") ? "Make your move" : "Computer is making its move...";
 }
