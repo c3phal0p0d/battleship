@@ -13,6 +13,17 @@ const Game = () => {
     let shipIndex = 0;
     let readyToPlay = false;
 
+    /*** UTILS ***/
+    const rotateShip = () => {
+        isHorizontal = (isHorizontal == true) ? false : true;
+    }
+
+    const getCoordinates = (square) => {
+        let x = parseInt(square.getAttribute("data-row"));
+        let y = parseInt(square.getAttribute("data-column"));
+        return [x, y];
+    }
+
     /*** INIT ***/
     const start = () => {
         initializePlaceShipsView();
@@ -22,6 +33,7 @@ const Game = () => {
         display.renderPlaceShipsView();
         display.displayShipType(fleet[shipIndex].type);
 
+        rotateShip();
         addRotateButtonEventListener();
         addPlaceShipSquareEventListeners();
     }
@@ -39,10 +51,9 @@ const Game = () => {
         addGameSquareEventListeners();
     }
 
-
     /*** EVENT LISTENERS ***/
     const addRotateButtonEventListener = () => {
-       document.querySelector("#rotate-ship-button").addEventListener("click", () => rotateShip());
+       document.querySelector("#rotate-ship-button").addEventListener("click", rotateShip);
     }
 
     const addPlaceShipSquareEventListeners = () => {
@@ -91,31 +102,21 @@ const Game = () => {
             
             squares[i].addEventListener("mouseover", (event) => {
                 let coordinates = getCoordinates(event.currentTarget);
-                if (isValidMove(coordinates, enemy.gameboard)) display.renderMoveToMake(coordinates);
+                if (isValidMove(coordinates, enemy.gameboard)) display.renderMoveToMake(coordinates, "enemy");
             });
             squares[i].addEventListener("mouseout", (event) => {
                 let coordinates = getCoordinates(event.currentTarget);
-                if (isValidMove(coordinates, enemy.gameboard)) display.clearMoveToMake(coordinates);
+                if (isValidMove(coordinates, enemy.gameboard)) display.clearMoveToMake(coordinates,"enemy");
             });
             squares[i].addEventListener("click", (event) => {
                 let coordinates = getCoordinates(event.currentTarget);
                 if (isValidMove(coordinates, enemy.gameboard)) {
-                    display.renderMove(coordinates, "hit");
                     makeMove(coordinates);
+                    display.renderMove(coordinates, getMoveOutcome(coordinates), "enemy");
+                    renderSunkShips(enemy.gameboard, "enemy");
                 }
             });
         }
-    }
-
-    /*** UTILS ***/
-    const rotateShip = () => {
-        isHorizontal = (isHorizontal == true) ? false : true;
-    }
-
-    const getCoordinates = (square) => {
-        let x = parseInt(square.getAttribute("data-row"));
-        let y = parseInt(square.getAttribute("data-column"));
-        return [x, y];
     }
 
     /*** INITIALIZE SHIP POSITIONS ***/
@@ -143,11 +144,11 @@ const Game = () => {
         // check if ship overlaps with another ship
         for (let i=0; i<ship.length; i++){
             if (isHorizontal){
-                if (board.getSquare(coordinates[0], coordinates[1] + i)!=null) {
+                if (board.getSquare(coordinates[0], coordinates[1] + i)[0]!="empty") {
                     return false;
                 }
             } else {
-                if (board.getSquare(coordinates[0] + i, coordinates[1])!=null) {
+                if (board.getSquare(coordinates[0] + i, coordinates[1])[0]!="empty") {
                     return false;
                 }
             }
@@ -171,29 +172,64 @@ const Game = () => {
     }
 
     /*** GAMEPLAY ***/
+    const makeMove = (coordinates=null) => {
+        if (currentPlayerTurn=="player"){
+            player.attack(enemy.gameboard, coordinates);
+            //currentPlayerTurn = "computer";
+            display.displayCurrentPlayerTurn();
+            
+        } /* else {
+            enemy.automatedAttack(player.gameboard);
+            currentPlayerTurn = "player";
+            display.displayCurrentPlayerTurn();
+        }
+        */
+    }
+
     const isValidMove = (coordinates, board) => {
         // prevent player move when it is computer's turn
+        /*
         if (currentPlayerTurn=="computer"){
             return false;
         }
+        */
 
         // check if square has already been hit
-        if (board.getSquare(coordinates[0], coordinates[1])=="m" | board.getSquare(coordinates[0], coordinates[1])=="s"){
+        let square = board.getSquare(coordinates[0], coordinates[1]);
+        if (square[1]=="miss" | square[1]=="sunk" | square[1]=="hit"){
             return false;
         }
 
         return true;
     }
 
-    const makeMove = (coordinates=null) => {
-        if (currentPlayerTurn=="player"){
-            player.attack(enemy.gameboard, coordinates);
-            currentPlayerTurn = "computer";
-            display.displayCurrentPlayerTurn();
-        } else {
-            enemy.automatedAttack(player.gameboard);
-            currentPlayerTurn = "player";
-            display.displayCurrentPlayerTurn();
+    const getMoveOutcome = (coordinates) => {
+        let square = enemy.gameboard.getSquare(coordinates[0], coordinates[1]);
+
+        if (typeof(square[0])=="object"){
+            return "hit";
+        }
+
+        switch (square[1]) {
+            case (""):
+            case ("miss"):
+                return "miss";
+            case ("hit"):
+                return "hit";
+            case ("sunk"):
+                return "sunk";
+        }
+    }
+
+    const renderSunkShips = (board, enemyPlayer) => {
+        console.log("renderSunkShips");
+        for (let i=0; i<10; i++){
+            for (let j=0; j<10; j++){
+                console.log("Square" + board.getSquare(i, j)[1]);
+                if (board.getSquare(i, j)[1]== "sunk"){
+                    display.renderMove([i, j], "sunk", enemyPlayer);
+                }
+            }
         }
     }
 
