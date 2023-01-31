@@ -179,7 +179,6 @@ const Display = () => {
     }
     
     const renderMove = (coordinates, moveOutcome, enemyPlayer) => {
-        console.log(moveOutcome);
         let square = getSquareFromCoordinates(coordinates, enemyPlayer);
         
         switch (moveOutcome){

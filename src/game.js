@@ -112,8 +112,6 @@ const Game = () => {
                 let coordinates = getCoordinates(event.currentTarget);
                 if (isValidMove(coordinates, enemy.gameboard)) {
                     makeMove(coordinates);
-                    display.renderMove(coordinates, getMoveOutcome(coordinates), "enemy");
-                    renderSunkShips(enemy.gameboard, "enemy");
                 }
             });
         }
@@ -173,26 +171,33 @@ const Game = () => {
 
     /*** GAMEPLAY ***/
     const makeMove = (coordinates=null) => {
+        console.log("make move");
         if (currentPlayerTurn=="player"){
+            console.log("player move");
             player.attack(enemy.gameboard, coordinates);
-            //currentPlayerTurn = "computer";
-            display.displayCurrentPlayerTurn();
+            display.renderMove(coordinates, getMoveOutcome(coordinates, enemy.gameboard), "enemy");
+            renderSunkShips(enemy.gameboard, "enemy");
+            currentPlayerTurn = "computer";
+            display.displayCurrentPlayerTurn(currentPlayerTurn);
+            makeMove();
+        } else {
+            console.log("enemy move");
+            let coordinates = enemy.automatedAttack(player.gameboard);
             
-        } /* else {
-            enemy.automatedAttack(player.gameboard);
-            currentPlayerTurn = "player";
-            display.displayCurrentPlayerTurn();
+            setTimeout(function () {
+                currentPlayerTurn = "player";
+                display.displayCurrentPlayerTurn(currentPlayerTurn);
+                display.renderMove(coordinates, getMoveOutcome(coordinates, player.gameboard), "player");
+                renderSunkShips(player.gameboard, "player");
+            }, 2000);
         }
-        */
     }
 
     const isValidMove = (coordinates, board) => {
         // prevent player move when it is computer's turn
-        /*
         if (currentPlayerTurn=="computer"){
             return false;
         }
-        */
 
         // check if square has already been hit
         let square = board.getSquare(coordinates[0], coordinates[1]);
@@ -203,8 +208,8 @@ const Game = () => {
         return true;
     }
 
-    const getMoveOutcome = (coordinates) => {
-        let square = enemy.gameboard.getSquare(coordinates[0], coordinates[1]);
+    const getMoveOutcome = (coordinates, enemyBoard) => {
+        let square = enemyBoard.getSquare(coordinates[0], coordinates[1]);
 
         if (typeof(square[0])=="object"){
             return "hit";
@@ -222,10 +227,8 @@ const Game = () => {
     }
 
     const renderSunkShips = (board, enemyPlayer) => {
-        console.log("renderSunkShips");
         for (let i=0; i<10; i++){
             for (let j=0; j<10; j++){
-                console.log("Square" + board.getSquare(i, j)[1]);
                 if (board.getSquare(i, j)[1]== "sunk"){
                     display.renderMove([i, j], "sunk", enemyPlayer);
                 }
