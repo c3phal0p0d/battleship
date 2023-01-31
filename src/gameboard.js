@@ -19,8 +19,8 @@ const Gameboard = () => {
         for (let i=0; i<coordinatesArray.length; i++){
             coordinates = coordinatesArray[i];
             board[coordinates[0]][coordinates[1]][0] = ship;
-            shipsCount++;
         }
+        shipsCount++;
     }
 
     const receiveAttack = (coordinates) => {

@@ -3,15 +3,14 @@ const Ship = require("./ship");
 const Display = require("./display");
 
 const Game = () => {
-    const display = Display();
     const fleet = [Ship("Carrier", 5), Ship("Battleship", 4), Ship("Destroyer", 3), Ship("Submarine", 3), Ship("Patrol Boat", 2)];
-    const player = Player();
-    const enemy = Player();
-
-    let currentPlayerTurn = "player";
-    let isHorizontal = true;
-    let shipIndex = 0;
-    let readyToPlay = false;
+    let display;
+    let player;
+    let enemy;
+    let currentPlayerTurn;
+    let isHorizontal;
+    let shipIndex;
+    let readyToPlay;
 
     /*** UTILS ***/
     const rotateShip = () => {
@@ -26,6 +25,15 @@ const Game = () => {
 
     /*** INIT ***/
     const start = () => {
+        // initialize values
+        display = Display();
+        player = Player();
+        enemy = Player();
+        currentPlayerTurn = "player";
+        isHorizontal = true;
+        shipIndex = 0;
+        readyToPlay = false;
+
         initializePlaceShipsView();
     }
     
@@ -117,6 +125,10 @@ const Game = () => {
         }
     }
 
+    const addPlayAgainButtonEventListener = () => {
+        document.querySelector("#play-again-button").addEventListener("click", (e) => start());
+    }
+
     /*** INITIALIZE SHIP POSITIONS ***/
     const generateRandomShipPositions = (board) => {
         let coordinates = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
@@ -171,9 +183,10 @@ const Game = () => {
 
     /*** GAMEPLAY ***/
     const makeMove = (coordinates=null) => {
-        console.log("make move");
+        if (isGameOver()){
+            return;
+        }
         if (currentPlayerTurn=="player"){
-            console.log("player move");
             player.attack(enemy.gameboard, coordinates);
             display.renderMove(coordinates, getMoveOutcome(coordinates, enemy.gameboard), "enemy");
             renderSunkShips(enemy.gameboard, "enemy");
@@ -181,7 +194,6 @@ const Game = () => {
             display.displayCurrentPlayerTurn(currentPlayerTurn);
             makeMove();
         } else {
-            console.log("enemy move");
             let coordinates = enemy.automatedAttack(player.gameboard);
             
             setTimeout(function () {
@@ -235,6 +247,23 @@ const Game = () => {
             }
         }
     }
+
+    /*** GAME OVER LOGIC ***/
+    const isGameOver = () => {
+        if (player.gameboard.allShipsSunk()){
+            display.displayGameOver("You lost");
+            display.renderPlayAgainButton();
+            addPlayAgainButtonEventListener();
+            return true;
+        } else if (enemy.gameboard.allShipsSunk()){
+            display.displayGameOver("You won!");
+            display.renderPlayAgainButton();
+            addPlayAgainButtonEventListener();
+            return true;
+        }
+        return false;
+    }
+
 
     return {
         start

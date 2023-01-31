@@ -8,7 +8,6 @@ const Player = () => {
     }
 
     const automatedAttack = (enemyGameboard) => {
-        console.log("automated attack")
         let coordinates = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
         let square = enemyGameboard.getSquare(coordinates[0], coordinates[1]);
 

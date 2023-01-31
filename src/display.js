@@ -205,8 +205,25 @@ const Display = () => {
     }
 
     const getSquareFromCoordinates = (coordinates, enemyPlayer) => {
-        
         return document.querySelector(`.${enemyPlayer}[data-row="${coordinates[0]}"][data-column="${coordinates[1]}"]`);
+    }
+
+    const displayGameOver = (message) => {
+        const currentPlayerTurnDiv = document.querySelector("#current-player-turn");
+        currentPlayerTurnDiv.textContent = "";
+        const gameOverText = document.createElement("div");
+        gameOverText.id = "game-over-text";
+        gameOverText.textContent = message;
+        currentPlayerTurnDiv.appendChild(gameOverText);
+    }
+
+    const renderPlayAgainButton = () => {
+        const currentPlayerTurnDiv = document.querySelector("#current-player-turn");
+        //currentPlayerTurnDiv.appendChild(document.createElement("br"));
+        const playAgainButton = document.createElement("button");
+        playAgainButton.id = "play-again-button";
+        playAgainButton.textContent = "Play again";
+        currentPlayerTurnDiv.appendChild(playAgainButton);
     }
 
     return {
@@ -222,7 +239,9 @@ const Display = () => {
         renderGameboard,
         renderMoveToMake,
         clearMoveToMake,
-        renderMove
+        renderMove,
+        displayGameOver,
+        renderPlayAgainButton
     }
 };
 
