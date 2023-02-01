@@ -10,9 +10,12 @@ const Ship = (type, length) => {
     }
 
     return {
-         get type() {
+        get hitCount() {
+            return hitCount;
+        },
+        get type() {
             return type;
-         },
+        },
         get length() {
             return length;
         },

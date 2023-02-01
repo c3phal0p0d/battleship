@@ -3,7 +3,8 @@ const Ship = require("./ship");
 const Display = require("./display");
 
 const Game = () => {
-    const fleet = [Ship("Carrier", 5), Ship("Battleship", 4), Ship("Destroyer", 3), Ship("Submarine", 3), Ship("Patrol Boat", 2)];
+    let playerFleet = [Ship("Carrier", 5), Ship("Battleship", 4), Ship("Destroyer", 3), Ship("Submarine", 3), Ship("Patrol Boat", 2)];
+    let enemyFleet = [Ship("Carrier", 5), Ship("Battleship", 4), Ship("Destroyer", 3), Ship("Submarine", 3), Ship("Patrol Boat", 2)];
     let display;
     let player;
     let enemy;
@@ -39,7 +40,7 @@ const Game = () => {
     
     const initializePlaceShipsView = () => {
         display.renderPlaceShipsView();
-        display.displayShipType(fleet[shipIndex].type);
+        display.displayShipType(playerFleet[shipIndex].type);
 
         rotateShip();
         addRotateButtonEventListener();
@@ -51,7 +52,6 @@ const Game = () => {
 
         display.renderGameView();
         display.displayCurrentPlayerTurn(currentPlayerTurn);
-
         
         display.renderGameboard(player.gameboard, document.querySelector(".board.player"), true);
         display.renderGameboard(enemy.gameboard,document.querySelector(".board.enemy"), false);
@@ -70,22 +70,22 @@ const Game = () => {
         for (let i=0; i<squares.length; i++){
             squares[i].addEventListener("mouseover", (event) => {
                 let coordinates = getCoordinates(event.currentTarget);
-                if (!readyToPlay && isValidShipPosition(coordinates, fleet[shipIndex], isHorizontal, player.gameboard)){
-                    display.renderShipToBePlaced(fleet[shipIndex], coordinates, isHorizontal);
+                if (!readyToPlay && isValidShipPosition(coordinates, playerFleet[shipIndex], isHorizontal, player.gameboard)){
+                    display.renderShipToBePlaced(playerFleet[shipIndex], coordinates, isHorizontal);
                 }
             });
             squares[i].addEventListener("mouseout", (event) => {
                 let coordinates = getCoordinates(event.currentTarget);
-                if (!readyToPlay && isValidShipPosition(coordinates, fleet[shipIndex], isHorizontal, player.gameboard)){
-                    display.clearShipToBePlaced(fleet[shipIndex], coordinates, isHorizontal);
+                if (!readyToPlay && isValidShipPosition(coordinates, playerFleet[shipIndex], isHorizontal, player.gameboard)){
+                    display.clearShipToBePlaced(playerFleet[shipIndex], coordinates, isHorizontal);
                 }
             });
             squares[i].addEventListener("click", (event) => {
                 let coordinates = getCoordinates(event.currentTarget);
-                if (!readyToPlay && isValidShipPosition(coordinates, fleet[shipIndex], isHorizontal, player.gameboard)){
-                    addShipToBoard(fleet[shipIndex], isHorizontal,coordinates, player.gameboard);
-                    display.renderShip(fleet[shipIndex], coordinates, isHorizontal);
-                    if (shipIndex==fleet.length-1){
+                if (!readyToPlay && isValidShipPosition(coordinates, playerFleet[shipIndex], isHorizontal, player.gameboard)){
+                    addShipToBoard(playerFleet[shipIndex], isHorizontal ,coordinates, player.gameboard);
+                    display.renderShip(playerFleet[shipIndex], coordinates, isHorizontal);
+                    if (shipIndex==playerFleet.length-1){
                         document.querySelector("#ship-type-container").innerHTML = "";
                         readyToPlay = true;
                         display.renderPlayButton();
@@ -93,7 +93,7 @@ const Game = () => {
                         return;
                     }
                     shipIndex++;
-                    display.displayShipType(fleet[shipIndex].type);
+                    display.displayShipType(playerFleet[shipIndex].type);
                 }
             });
         }
@@ -134,12 +134,12 @@ const Game = () => {
         let coordinates = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
         let isHorizontal = (Math.floor(Math.random() * 2)==1 ? true : false);
 
-        for (let i=0; i<fleet.length; i++){
-            while (!isValidShipPosition(coordinates, fleet[i], isHorizontal, board)){
+        for (let i=0; i<enemyFleet.length; i++){
+            while (!isValidShipPosition(coordinates, enemyFleet[i], isHorizontal, board)){
                 coordinates = [Math.floor(Math.random() * 10), Math.floor(Math.random() * 10)];
                 isHorizontal = (Math.floor(Math.random() * 2)==1 ? true : false);
             }
-            addShipToBoard(fleet[i], isHorizontal, coordinates, board);
+            addShipToBoard(enemyFleet[i], isHorizontal, coordinates, board);
         }
     }
 
@@ -183,24 +183,27 @@ const Game = () => {
 
     /*** GAMEPLAY ***/
     const makeMove = (coordinates=null) => {
-        if (isGameOver()){
-            return;
-        }
         if (currentPlayerTurn=="player"){
             player.attack(enemy.gameboard, coordinates);
             display.renderMove(coordinates, getMoveOutcome(coordinates, enemy.gameboard), "enemy");
             renderSunkShips(enemy.gameboard, "enemy");
             currentPlayerTurn = "computer";
             display.displayCurrentPlayerTurn(currentPlayerTurn);
-            makeMove();
-        } else {
-            let coordinates = enemy.automatedAttack(player.gameboard);
+            if (isGameOver()){
+                return;
+            }
+
+            // computer's turn
+            coordinates = enemy.automatedAttack(player.gameboard);
             
             setTimeout(function () {
                 currentPlayerTurn = "player";
                 display.displayCurrentPlayerTurn(currentPlayerTurn);
                 display.renderMove(coordinates, getMoveOutcome(coordinates, player.gameboard), "player");
                 renderSunkShips(player.gameboard, "player");
+                if (isGameOver()){
+                    return;
+                }
             }, 2000);
         }
     }
@@ -239,9 +242,29 @@ const Game = () => {
     }
 
     const renderSunkShips = (board, enemyPlayer) => {
+        let shipFleet = (enemyPlayer=="player") ? playerFleet : enemyFleet;
+        for (let i=0; i<shipFleet.length; i++){
+            if (checkSunkShip(shipFleet[i], board)) {
+                renderSunkShip(shipFleet[i], board, enemyPlayer);
+            }
+        }
+    }
+
+    const checkSunkShip = (ship, board) => {
         for (let i=0; i<10; i++){
             for (let j=0; j<10; j++){
-                if (board.getSquare(i, j)[1]== "sunk"){
+                if (board.getSquare(i, j)[0]==ship && board.getSquare(i, j)[1] == "sunk"){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    const renderSunkShip = (ship, board, enemyPlayer) => {
+        for (let i=0; i<10; i++){
+            for (let j=0; j<10; j++){
+                if (board.getSquare(i, j)[0]==ship){
                     display.renderMove([i, j], "sunk", enemyPlayer);
                 }
             }

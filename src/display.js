@@ -157,6 +157,10 @@ const Display = () => {
                         square.style.border = "0.5px solid #1e1c32";
                     }
                 } else if (!isPlayerBoard) {
+                    if (typeof(gameboard.getSquare(i, j))[0]=="object"){
+                        square.style.backgroundColor = "#e5dace";
+                        square.style.border = "0.5px solid #1e1c32";
+                    }
                     square.classList.add("enemy");
                 }
                 
@@ -193,6 +197,7 @@ const Display = () => {
                 square.style.color =  "#e5dace";
                 square.style.backgroundColor = "#e5dace59";
                 square.style.border = "0.5px solid #e5dace";
+                square.classList.add("sunk");
                 square.textContent = "X";
                 break;
             case "miss":
