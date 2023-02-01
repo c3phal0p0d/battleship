@@ -157,10 +157,6 @@ const Display = () => {
                         square.style.border = "0.5px solid #1e1c32";
                     }
                 } else if (!isPlayerBoard) {
-                    if (typeof(gameboard.getSquare(i, j))[0]=="object"){
-                        square.style.backgroundColor = "#e5dace";
-                        square.style.border = "0.5px solid #1e1c32";
-                    }
                     square.classList.add("enemy");
                 }
                 
